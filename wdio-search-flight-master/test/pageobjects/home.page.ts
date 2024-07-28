@@ -1,10 +1,7 @@
 import { $ } from "@wdio/globals";
-import Page from "./page.js";
+import CommonPage from "./common.page.js";
 
-/**
- * sub page containing specific selectors and methods for a specific page
- */
-class HomePage extends Page {
+class HomePage extends CommonPage {
 
   public btnChooseLocation(name: "From" | "To") {
     return $(`//input[@name='${name}']`);
@@ -55,7 +52,7 @@ class HomePage extends Page {
       `//div[ancestor::*[contains(@class,'pop-flight-passenger')] and @data-field='nb_${type}' and @data-type='plus']//i`
     );
   }
-  
+
   public async homeSearchMenu(tab: string) {
     return await $(`[data-id=${tab}]`);
   }
@@ -64,7 +61,7 @@ class HomePage extends Page {
     tabName: "Vé máy bay" | "Khách sạn" | "Tour du lịch"
   ): Promise<void> {
     let tab = ""
-    switch(tabName) {
+    switch (tabName) {
       case 'Vé máy bay':
         tab = 'flight'
         break;
@@ -77,17 +74,17 @@ class HomePage extends Page {
     await (await this.homeSearchMenu(tab)).click()
   }
 
-  public async selectLocationFlight(type: "From" | "To", des: string) {
+  public async selectLocationFlight(type: "From" | "To", location: string) {
     let selectFlightBtn = await this.btnChooseLocation(type);
     await selectFlightBtn.click();
     let popup =
       type == "From" ? await this.popupFlightFrom : await this.popupFlightTo;
     let input =
       type == "From" ? await this.inputFlightFromPopup : await this.inputFlightToPopup;
-    await expect(popup).toBeDisplayed;
-    await expect(input).toBeDisplayed();
-    await input.addValue(des);
-    let listSuggest = await $(`strong.tt-highlight.*=${des}`);
+    await popup.waitForDisplayed();
+    await input.waitForDisplayed();
+    await input.addValue(location);
+    let listSuggest = await $(`strong.tt-highlight.*=${location}`);
     await expect(listSuggest).toBeExisting();
     await listSuggest.click();
   }
@@ -125,8 +122,8 @@ class HomePage extends Page {
         currentValue = await inputEle.getValue();
         expect(parseInt(currentValue)).toEqual(value);
       }
+    }
   }
- }
 }
 
 export default new HomePage();
